@@ -10,13 +10,13 @@ import (
 func main() {
 	deliveryChan := make(chan kafka.Event)
 	producer := NewKafkaProducer()
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		msg := ("mensagem " + fmt.Sprint(i))
-		Publish(msg, "teste", producer, nil, deliveryChan)
+		Publish([]byte(msg), "teste", producer /*[]byte("mensagem"),*/, nil, deliveryChan)
 	}
 
 	go DeliveryReport(deliveryChan)
-	producer.Flush(1000)
+	producer.Flush(2000)
 
 	// e := <-deliveryChan
 	// msg := e.(*kafka.Message)
@@ -50,10 +50,10 @@ func NewKafkaProducer() *kafka.Producer {
 	return p
 }
 
-func Publish(msg string, topic string, producer *kafka.Producer, key []byte, deliveryChan chan kafka.Event) error {
+func Publish(msg []byte, topic string, producer *kafka.Producer, key []byte, deliveryChan chan kafka.Event) error {
 	message := &kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          []byte(msg),
+		Value:          msg,
 		Key:            key,
 	}
 
